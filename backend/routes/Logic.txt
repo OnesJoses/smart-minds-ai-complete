@@ -1,0 +1,20 @@
+// Pseudocode for combining both sources
+async function getAnswer(userQuestion) {
+  // 1. Search your own knowledge base
+  const kbResponse = await fetch(`/api/knowledge/search?q=${encodeURIComponent(userQuestion)}`);
+  const kbData = await kbResponse.json();
+
+  if (kbData && kbData.answers && kbData.answers.length > 0) {
+    // If a good answer is found, return it
+    return kbData.answers[0];
+  } else {
+    // Otherwise, use Puter.js AI
+    // Make sure <script src="https://js.puter.com/v2/"></script> is loaded
+    if (window.puter && window.puter.ai) {
+      const aiResponse = await window.puter.ai.chat(userQuestion);
+      return aiResponse.message?.content || "No answer found.";
+    } else {
+      return "AI service not available.";
+    }
+  }
+}

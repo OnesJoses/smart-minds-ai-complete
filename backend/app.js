@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const openaiRoutes = require('./routes/openai');
+const knowledgeRoutes = require('./routes/knowledge');
 const app = express();
 
 app.use(cors());
@@ -11,6 +12,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/openai', openaiRoutes);
+app.use('/api/knowledge', knowledgeRoutes);
 
 mongoose.connect('mongodb://localhost:27017/smartminds');
 app.listen(5000, () => console.log('Server running on port 5000'));
