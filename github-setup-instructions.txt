@@ -1,0 +1,14 @@
+#!/bin/bash
+
+echo "🚀 Smart Minds AI - Repository Setup"
+echo "======================================="
+echo ""
+echo "After creating 'Smart-Minds-AI-Platform' on GitHub, run these commands:"
+echo ""
+echo "git remote add origin https://github.com/OnesJoses/Smart-Minds-AI-Platform.git"
+echo "git push -u origin main"
+echo ""
+echo "Then your repository will be live at:"
+echo "https://github.com/OnesJoses/Smart-Minds-AI-Platform"
+echo ""
+echo "After that, you can deploy on Vercel by importing from GitHub!"
