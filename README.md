@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Smart Minds - AI Learning Platform
 
 A powerful AI-enhanced learning platform with free, unlimited access to advanced AI models including GPT-4o, o3, o1, and DALL-E through Puter.js.
@@ -252,3 +253,6 @@ The project uses Tailwind CSS for styling with custom animations and glassmorphi
 
 This project is open source and available under the MIT License.
 # Smart-Minds-AI-Platform
+=======
+# smart-minds-ai-complete
+>>>>>>> ba748e6e84586b2ae06c8521bc80e44d3feef5f9
