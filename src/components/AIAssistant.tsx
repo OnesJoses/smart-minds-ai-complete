@@ -38,10 +38,9 @@ export default function AIAssistant() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
+  // Remove Puter.js check; assume AI is available unless backend fails
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.puter || !window.puter.ai) {
-      setAiAvailable(false);
-    }
+    setAiAvailable(true);
   }, []);
 
   useEffect(() => {
@@ -147,7 +146,7 @@ export default function AIAssistant() {
           <CardDescription>
             <span className="ai-error-message">
               AI service is unavailable. Please check your internet connection or reload the page.<br />
-              If the issue persists, ensure Puter.js is loaded in your index.html.
+              If the issue persists, ensure your backend OpenAI API is running and reachable.
             </span>
           </CardDescription>
         </CardHeader>

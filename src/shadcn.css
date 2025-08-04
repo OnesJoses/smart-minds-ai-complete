@@ -1,6 +1,37 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Add new day and night theme variables */
+.day {
+  --background: 45 100% 95%; /* soft yellow */
+  --foreground: 30 80% 20%; /* warm brown */
+  --card: 45 100% 98%;
+  --card-foreground: 30 80% 20%;
+  --primary: 45 100% 80%;
+  --primary-foreground: 30 80% 20%;
+  --secondary: 45 100% 90%;
+  --secondary-foreground: 30 80% 20%;
+  --accent: 45 100% 85%;
+  --accent-foreground: 30 80% 20%;
+  --border: 45 100% 80%;
+  --input: 45 100% 80%;
+  --ring: 30 80% 20%;
+}
+.night {
+  --background: 220 40% 15%; /* deep blue */
+  --foreground: 240 20% 90%; /* soft white */
+  --card: 220 40% 18%;
+  --card-foreground: 240 20% 90%;
+  --primary: 260 60% 40%; /* purple */
+  --primary-foreground: 240 20% 90%;
+  --secondary: 220 40% 20%;
+  --secondary-foreground: 240 20% 90%;
+  --accent: 260 60% 45%;
+  --accent-foreground: 240 20% 90%;
+  --border: 220 40% 25%;
+  --input: 220 40% 25%;
+  --ring: 260 60% 40%;
+}
 
 :root {
   --background: 0 0% 100%;
@@ -110,12 +141,13 @@ html > body * {
 /* Custom animations and styles for Smart Minds */
 .glassmorphism {
   background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(20px); /* Safari support */
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .animated-bg {
-  background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899);
+  background: linear-gradient(45deg, #83f63b, #735cf6, #ec4856);
   background-size: 400% 400%;
   animation: gradient 15s ease infinite;
 }

@@ -52,7 +52,8 @@ interface User {
 
 export default function Home() {
   // Remove duplicate state declarations
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  // Theme mode: 'default' (light/dark), 'day', 'night'
+  const [themeMode, setThemeMode] = useState<'default' | 'day' | 'night'>('default')
   const [activeTab, setActiveTab] = useState('dashboard')
   const [showAuthModal, setShowAuthModal] = useState<'signin' | 'signup' | null>(null)
   const [user, setUser] = useState<User | null>(null)
@@ -60,9 +61,19 @@ export default function Home() {
   /**
    * Toggle between dark and light mode
    */
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode)
-    document.documentElement.classList.toggle('dark')
+  /**
+   * Cycle theme mode: default -> day -> night -> default
+   */
+  const cycleThemeMode = () => {
+    let nextMode: 'default' | 'day' | 'night' = 'default';
+    if (themeMode === 'default') nextMode = 'day';
+    else if (themeMode === 'day') nextMode = 'night';
+    else nextMode = 'default';
+    setThemeMode(nextMode);
+    document.documentElement.classList.remove('dark', 'day', 'night');
+    if (nextMode === 'day') document.documentElement.classList.add('day');
+    else if (nextMode === 'night') document.documentElement.classList.add('night');
+    else document.documentElement.classList.add('dark');
   }
 
   /**
@@ -207,10 +218,11 @@ export default function Home() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={toggleDarkMode}
+                onClick={cycleThemeMode}
                 className="bg-white/10 border-white/20 hover:bg-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-105"
+                title={themeMode === 'default' ? 'Switch to Day Mode' : themeMode === 'day' ? 'Switch to Night Mode' : 'Switch to Default'}
               >
-                {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {themeMode === 'default' ? <Moon className="h-4 w-4" /> : themeMode === 'day' ? <Sun className="h-4 w-4 text-yellow-500" /> : <Sparkles className="h-4 w-4 text-purple-400" />}
               </Button>
             </div>
           </div>
