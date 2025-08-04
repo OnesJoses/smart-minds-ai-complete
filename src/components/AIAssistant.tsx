@@ -5,6 +5,7 @@
  */
 
 import { useState, useRef, useEffect } from 'react'
+import { SmartMindsAI } from '../lib/ai-service'
 import { Button } from './ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Input } from './ui/input'
@@ -21,6 +22,7 @@ interface Message extends AIMessage {
 }
 
 export default function AIAssistant() {
+  const [aiAvailable, setAiAvailable] = useState(true)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -35,6 +37,15 @@ export default function AIAssistant() {
   const [isStreaming, setIsStreaming] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+
+  /**
+   * Check if Puter.js is loaded
+   */
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.puter || !window.puter.ai) {
+      setAiAvailable(false)
+    }
+  }, [])
 
   /**
    * Auto-scroll to bottom when new messages arrive
@@ -63,21 +74,35 @@ export default function AIAssistant() {
     setInputMessage('')
     setIsLoading(true)
 
-    try {
-      // Check if the message is asking for image generation
-      if (inputMessage.toLowerCase().includes('generate image') || 
-          inputMessage.toLowerCase().includes('create image') ||
-          inputMessage.toLowerCase().includes('draw') ||
-          inputMessage.toLowerCase().includes('picture of')) {
-        
-        const imagePrompt = inputMessage.replace(/generate image|create image|draw|picture of/gi, '').trim()
-        const imageElement = await smartMindsAI.generateImage(imagePrompt)
-        
-        const aiResponse: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: `I've generated an image for "${imagePrompt}". Here it is:`,
-          timestamp: new Date()
+  if (!aiAvailable) {
+    return (
+      <Card className="max-w-2xl mx-auto my-8 shadow-2xl border border-white/10 bg-white/5 backdrop-blur-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bot className="h-6 w-6 text-blue-500" /> AI Assistant
+          </CardTitle>
+          <CardDescription>
+            <span style={{ color: 'red' }}>AI service is unavailable. Please check your connection or try again later.</span>
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    )
+  }
+  return (
+    <Card className="max-w-2xl mx-auto my-8 shadow-2xl border border-white/10 bg-white/5 backdrop-blur-lg">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Bot className="h-6 w-6 text-blue-500" /> AI Assistant
+        </CardTitle>
+        <CardDescription>
+          Powered by GPT-4o, o3, o1, DALL-E and more (no API key required)
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {/* ...existing chat UI code... */}
+      </CardContent>
+    </Card>
+  )
         }
 
         setMessages(prev => [...prev, aiResponse])
