@@ -4,25 +4,25 @@
  * Supports GPT-4o, o3, o1, DALL-E and more without API keys
  */
 
-import { useState, useRef, useEffect } from 'react'
-import { SmartMindsAI } from '../lib/ai-service'
-import { Button } from './ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
-import { Input } from './ui/input'
-import { ScrollArea } from './ui/scroll-area'
-import { Badge } from './ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger } from './ui/select'
-import { Send, Bot, User, Sparkles, Brain, Loader2, Settings } from 'lucide-react'
-import { smartMindsAI, SmartMindsAI, AIMessage } from '../lib/ai-service'
+import React, { useState, useRef, useEffect } from 'react';
+import { Button } from './ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Input } from './ui/input';
+import { ScrollArea } from './ui/scroll-area';
+import { Badge } from './ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger } from './ui/select';
+import { Send, Bot, User, Sparkles, Brain, Loader2, Settings } from 'lucide-react';
+import { smartMindsAI, SmartMindsAI, AIMessage } from '../lib/ai-service';
+import './AIAssistant.css';
 
 interface Message extends AIMessage {
-  id: string
-  isLoading?: boolean
-  isStreaming?: boolean
+  id: string;
+  isLoading?: boolean;
+  isStreaming?: boolean;
 }
 
 export default function AIAssistant() {
-  const [aiAvailable, setAiAvailable] = useState(true)
+  const [aiAvailable, setAiAvailable] = useState(true);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -30,49 +30,112 @@ export default function AIAssistant() {
       content: "Hello! I'm your AI learning assistant powered by advanced AI models including GPT-4o, o3, and o1. I can help you with:\n\n🎓 **Study Planning** - Create personalized study schedules\n📚 **Learning Support** - Explain complex concepts\n🃏 **Flashcard Generation** - Create custom study materials\n🖼️ **Image Analysis** - Analyze diagrams and visual content\n🎨 **Visual Learning** - Generate educational images\n\nWhat would you like to learn about today?",
       timestamp: new Date()
     }
-  ])
-  const [inputMessage, setInputMessage] = useState('')
-  const [selectedModel, setSelectedModel] = useState(SmartMindsAI.MODELS.GPT_4O)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isStreaming, setIsStreaming] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const scrollAreaRef = useRef<HTMLDivElement>(null)
+  ]);
+  const [inputMessage, setInputMessage] = useState('');
+  const [selectedModel, setSelectedModel] = useState(SmartMindsAI.MODELS.GPT_4O);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  /**
-   * Check if Puter.js is loaded
-   */
   useEffect(() => {
     if (typeof window === 'undefined' || !window.puter || !window.puter.ai) {
-      setAiAvailable(false)
+      setAiAvailable(false);
     }
-  }, [])
+  }, []);
 
-  /**
-   * Auto-scroll to bottom when new messages arrive
-   */
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages])
+  }, [messages]);
 
-  /**
-   * Handle sending a message to the AI
-   */
   const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return
+    if (!inputMessage.trim()) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: inputMessage,
       timestamp: new Date()
-    }
+    };
+    setMessages(prev => [...prev, userMessage]);
+    setInputMessage('');
+    setIsLoading(true);
 
-    // Add user message to chat
-    setMessages(prev => [...prev, userMessage])
-    setInputMessage('')
-    setIsLoading(true)
+    try {
+      if (inputMessage.toLowerCase().includes('flashcard') || inputMessage.toLowerCase().includes('study cards')) {
+        const topic = inputMessage.replace(/flashcard|study cards|generate|create|make/gi, '').trim();
+        const response = await smartMindsAI.generateFlashcards(topic, 5);
+        const aiResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: response.content,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, aiResponse]);
+      } else {
+        const systemPrompt = `You are an expert AI tutor and learning assistant. You help students learn effectively by:
+        - Providing clear, accurate explanations
+        - Breaking down complex concepts into understandable parts
+        - Suggesting study strategies and techniques
+        - Creating engaging learning content
+        - Encouraging critical thinking
+        - Adapting to different learning styles
+        Always be encouraging, patient, and educational in your responses.`;
+
+        if (inputMessage.length > 50 || inputMessage.toLowerCase().includes('explain')) {
+          setIsStreaming(true);
+          let streamingResponse = '';
+          const streamingMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: '',
+            timestamp: new Date(),
+            isStreaming: true
+          };
+          setMessages(prev => [...prev, streamingMessage]);
+          await smartMindsAI.streamChat(
+            inputMessage,
+            (chunk) => {
+              streamingResponse += chunk;
+              setMessages(prev => prev.map(msg => msg.id === streamingMessage.id ? { ...msg, content: streamingResponse } : msg));
+            },
+            { model: selectedModel, systemPrompt }
+          );
+          setMessages(prev => prev.map(msg => msg.id === streamingMessage.id ? { ...msg, isStreaming: false } : msg));
+          setIsStreaming(false);
+        } else {
+          const response = await smartMindsAI.chat(inputMessage, { model: selectedModel, systemPrompt });
+          const aiResponse: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: response.content,
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, aiResponse]);
+        }
+      }
+    } catch (error) {
+      console.error('AI Assistant Error:', error);
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: "I apologize, but I'm having trouble processing your request right now. Please make sure you have a stable internet connection and try again.",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorResponse]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
 
   if (!aiAvailable) {
     return (
@@ -82,152 +145,14 @@ export default function AIAssistant() {
             <Bot className="h-6 w-6 text-blue-500" /> AI Assistant
           </CardTitle>
           <CardDescription>
-            <span style={{ color: 'red' }}>AI service is unavailable. Please check your connection or try again later.</span>
+            <span className="ai-error-message">
+              AI service is unavailable. Please check your internet connection or reload the page.<br />
+              If the issue persists, ensure Puter.js is loaded in your index.html.
+            </span>
           </CardDescription>
         </CardHeader>
       </Card>
-    )
-  }
-  return (
-    <Card className="max-w-2xl mx-auto my-8 shadow-2xl border border-white/10 bg-white/5 backdrop-blur-lg">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Bot className="h-6 w-6 text-blue-500" /> AI Assistant
-        </CardTitle>
-        <CardDescription>
-          Powered by GPT-4o, o3, o1, DALL-E and more (no API key required)
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {/* ...existing chat UI code... */}
-      </CardContent>
-    </Card>
-  )
-        }
-
-        setMessages(prev => [...prev, aiResponse])
-        
-        // Add the image to the chat
-        setTimeout(() => {
-          const chatContainer = scrollAreaRef.current
-          if (chatContainer && imageElement) {
-            imageElement.style.maxWidth = '300px'
-            imageElement.style.borderRadius = '8px'
-            imageElement.style.marginTop = '8px'
-            const messageDiv = chatContainer.querySelector(`[data-message-id="${aiResponse.id}"]`)
-            if (messageDiv) {
-              messageDiv.appendChild(imageElement)
-            }
-          }
-        }, 100)
-        
-      } else if (inputMessage.toLowerCase().includes('flashcard') || 
-                 inputMessage.toLowerCase().includes('study cards')) {
-        
-        // Generate flashcards
-        const topic = inputMessage.replace(/flashcard|study cards|generate|create|make/gi, '').trim()
-        const response = await smartMindsAI.generateFlashcards(topic, 5)
-        
-        const aiResponse: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: response.content,
-          timestamp: new Date()
-        }
-
-        setMessages(prev => [...prev, aiResponse])
-        
-      } else {
-        // Regular chat with enhanced educational context
-        const systemPrompt = `You are an expert AI tutor and learning assistant. You help students learn effectively by:
-        - Providing clear, accurate explanations
-        - Breaking down complex concepts into understandable parts
-        - Suggesting study strategies and techniques
-        - Creating engaging learning content
-        - Encouraging critical thinking
-        - Adapting to different learning styles
-        
-        Always be encouraging, patient, and educational in your responses.`
-
-        // Use streaming for longer responses
-        if (inputMessage.length > 50 || inputMessage.toLowerCase().includes('explain')) {
-          setIsStreaming(true)
-          let streamingResponse = ''
-          
-          const streamingMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            role: 'assistant',
-            content: '',
-            timestamp: new Date(),
-            isStreaming: true
-          }
-          
-          setMessages(prev => [...prev, streamingMessage])
-          
-          await smartMindsAI.streamChat(
-            inputMessage,
-            (chunk) => {
-              streamingResponse += chunk
-              setMessages(prev => 
-                prev.map(msg => 
-                  msg.id === streamingMessage.id 
-                    ? { ...msg, content: streamingResponse }
-                    : msg
-                )
-              )
-            },
-            { model: selectedModel, systemPrompt }
-          )
-          
-          // Mark streaming as complete
-          setMessages(prev => 
-            prev.map(msg => 
-              msg.id === streamingMessage.id 
-                ? { ...msg, isStreaming: false }
-                : msg
-            )
-          )
-          setIsStreaming(false)
-          
-        } else {
-          // Regular response for shorter queries
-          const response = await smartMindsAI.chat(inputMessage, {
-            model: selectedModel,
-            systemPrompt
-          })
-
-          const aiResponse: Message = {
-            id: (Date.now() + 1).toString(),
-            role: 'assistant',
-            content: response.content,
-            timestamp: new Date()
-          }
-
-          setMessages(prev => [...prev, aiResponse])
-        }
-      }
-    } catch (error) {
-      console.error('AI Assistant Error:', error)
-      const errorResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: "I apologize, but I'm having trouble processing your request right now. Please make sure you have a stable internet connection and try again.",
-        timestamp: new Date()
-      }
-      setMessages(prev => [...prev, errorResponse])
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  /**
-   * Handle Enter key press
-   */
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
-    }
+    );
   }
 
   return (
@@ -367,5 +292,5 @@ export default function AIAssistant() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

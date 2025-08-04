@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react'
+import styles from './Home.module.css'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
@@ -29,7 +30,6 @@ import {
   Moon,
   Sun,
   Sparkles,
-  Star,
   Zap,
   Rocket,
   Target,
@@ -51,6 +51,7 @@ interface User {
 }
 
 export default function Home() {
+  // Remove duplicate state declarations
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [showAuthModal, setShowAuthModal] = useState<'signin' | 'signup' | null>(null)
@@ -107,11 +108,7 @@ export default function Home() {
   }
 
   return (
-    <div className={`min-h-screen transition-all duration-500 relative overflow-hidden ${ 
-      isDarkMode 
-        ? 'bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900' 
-        : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
-    }`}>
+    <div className={styles.homeContainer}>
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Floating Orbs */}
@@ -119,26 +116,9 @@ export default function Home() {
         <div className="absolute top-40 right-20 w-24 h-24 bg-purple-400/20 rounded-full blur-lg animate-bounce delay-1000"></div>
         <div className="absolute bottom-40 left-1/4 w-40 h-40 bg-indigo-400/15 rounded-full blur-2xl animate-pulse delay-500"></div>
         <div className="absolute bottom-20 right-10 w-28 h-28 bg-pink-400/20 rounded-full blur-xl animate-bounce delay-2000"></div>
-        
         {/* Geometric Shapes */}
-        <div className="absolute top-1/4 right-1/3 w-16 h-16 border-2 border-blue-400/30 rotate-45 animate-spin" style={{animationDuration: '8s'}}></div>
+        <div className="absolute top-1/4 right-1/3 w-16 h-16 border-2 border-blue-400/30 rotate-45 animate-spin spin-slow"></div>
         <div className="absolute bottom-1/3 left-1/5 w-12 h-12 border-2 border-purple-400/30 rotate-12 animate-pulse"></div>
-        
-        {/* Sparkle Effects */}
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute animate-pulse"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 2}s`
-            }}
-          >
-            <Star className="h-3 w-3 text-yellow-400/40" />
-          </div>
-        ))}
       </div>
 
       {/* Gradient Overlay */}
@@ -168,7 +148,7 @@ export default function Home() {
               {/* Auth Section */}
               {user ? (
                 <div className="flex items-center space-x-3">
-                  {user.plan === 'premium' && (
+                  {user?.plan === 'premium' && (
                     <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30">
                       <Crown className="h-3 w-3 mr-1" />
                       Premium
@@ -176,14 +156,14 @@ export default function Home() {
                   )}
                   <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-full border border-white/20">
                     <Avatar className="w-8 h-8">
-                      <AvatarImage src={user.avatar} alt={user.name} />
+                      <AvatarImage src={user?.avatar} alt={user?.name} />
                       <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm">
-                        {user.name.charAt(0).toUpperCase()}
+                        {user?.name?.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="hidden sm:block">
-                      <p className="text-sm font-medium text-white">{user.name}</p>
-                      <p className="text-xs text-gray-400 capitalize">{user.plan} Plan</p>
+                      <p className="text-sm font-medium text-white">{user?.name}</p>
+                      <p className="text-xs text-gray-400 capitalize">{user?.plan} Plan</p>
                     </div>
                   </div>
                   <Button
@@ -280,7 +260,7 @@ export default function Home() {
                 <div className="inline-flex items-center space-x-2 mb-4 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
                   <Rocket className="h-4 w-4 text-yellow-400" />
                   <span className="text-sm font-medium">
-                    {user ? `Welcome back, ${user.name}!` : 'Supercharge Your Learning Journey'}
+                    {user ? `Welcome back, ${user?.name}!` : 'Supercharge Your Learning Journey'}
                   </span>
                   <Sparkles className="h-4 w-4 text-yellow-400" />
                 </div>
@@ -344,16 +324,16 @@ export default function Home() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <Avatar className="w-16 h-16">
-                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarImage src={user?.avatar} alt={user?.name} />
                         <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xl">
-                          {user.name.charAt(0).toUpperCase()}
+                          {user?.name?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h3 className="text-xl font-semibold text-white">Welcome back, {user.name}!</h3>
-                        <p className="text-gray-300">Member since {user.joinDate.toLocaleDateString()}</p>
+                        <h3 className="text-xl font-semibold text-white">Welcome back, {user?.name}!</h3>
+                        <p className="text-gray-300">Member since {user?.joinDate?.toLocaleDateString()}</p>
                         <Badge className="mt-2 bg-blue-500/20 text-blue-300 border-blue-500/30">
-                          {user.plan === 'premium' ? (
+                          {user?.plan === 'premium' ? (
                             <>
                               <Crown className="h-3 w-3 mr-1" />
                               Premium Member
@@ -364,7 +344,7 @@ export default function Home() {
                         </Badge>
                       </div>
                     </div>
-                    {user.plan === 'free' && (
+                    {user?.plan === 'free' && (
                       <Button className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700">
                         <Crown className="h-4 w-4 mr-2" />
                         Upgrade to Premium

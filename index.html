@@ -26,8 +26,24 @@
             script.src = 'https://js.puter.com/v2/';
             script.async = true;
             script.onload = function() {
-                // Remove loading message when script is loaded
                 loadingDiv.remove();
+                // Confirm Puter.js loaded
+                if (!window.puter || !window.puter.ai) {
+                  const errorDiv = document.createElement('div');
+                  errorDiv.id = 'ai-error';
+                  errorDiv.style.position = 'fixed';
+                  errorDiv.style.top = '0';
+                  errorDiv.style.left = '0';
+                  errorDiv.style.width = '100vw';
+                  errorDiv.style.height = '100vh';
+                  errorDiv.style.background = 'rgba(255,255,255,0.9)';
+                  errorDiv.style.display = 'flex';
+                  errorDiv.style.alignItems = 'center';
+                  errorDiv.style.justifyContent = 'center';
+                  errorDiv.style.zIndex = '9999';
+                  errorDiv.innerHTML = '<span style="font-size:1.5rem;color:red;">AI service loaded but not available. Please check your network or try again later.<br>If you use an ad blocker, please disable it for this site.</span>';
+                  document.body.appendChild(errorDiv);
+                }
             };
             script.onerror = function() {
                 loadingDiv.innerHTML = '<span style="font-size:1.5rem;color:red;">AI service failed to load. Please try again later.</span>';
